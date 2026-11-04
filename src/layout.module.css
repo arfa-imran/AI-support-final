@@ -1,0 +1,38 @@
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem;color:var(--text);text-decoration:none;letter-spacing:-.01em}
+.right{display:flex;align-items:center;gap:8px}
+.auth{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(900px 400px at 50% -10%,color-mix(in srgb,var(--primary) 12%,transparent),transparent),var(--bg)}
+.authTop{display:flex;justify-content:space-between;align-items:center;padding:16px 24px}
+.authMain{flex:1;display:grid;place-items:center;padding:16px 16px 48px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--primary);color:var(--on-primary);padding:8px 14px;border-radius:8px;z-index:100}.skip:focus{left:8px}
+.shell{display:grid;grid-template-columns:1fr;min-height:100vh}
+.col{min-width:0;display:flex;flex-direction:column}
+.side{position:fixed;inset:0 auto 0 0;width:272px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px;transform:translateX(-100%);transition:transform .22s ease;z-index:60}
+.side.open{transform:none;box-shadow:var(--sh-lg)}
+.drawerScrim{position:fixed;inset:0;background:rgba(8,13,24,.5);z-index:55;animation:fade .15s}@keyframes fade{from{opacity:0}}
+.sideTop{display:flex;justify-content:space-between;align-items:center;padding:4px 8px 20px}
+.nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.link{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r);color:var(--text-2);text-decoration:none;font-weight:500;transition:background var(--t),color var(--t)}
+.link:hover{background:var(--subtle);color:var(--text)}.link.on{background:var(--subtle);color:var(--primary);font-weight:600;box-shadow:inset 3px 0 0 var(--primary)}
+.collapse{display:flex;align-items:center;gap:12px;padding:10px 12px;border:0;background:none;color:var(--text-2);border-radius:var(--r);cursor:pointer;font:inherit}.collapse:hover{background:var(--subtle)}
+.top{position:sticky;top:0;z-index:40;height:64px;display:flex;align-items:center;gap:12px;padding:0 16px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.icon{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:var(--r);cursor:pointer}
+.crumbs{flex:1;min-width:0}.crumbs ol{display:flex;gap:8px;list-style:none;margin:0;padding:0;font-size:.88rem;color:var(--text-2);overflow:hidden;white-space:nowrap}
+.crumbs li+li::before{content:"/";margin-right:8px;color:var(--border)}.crumbs li:last-child{color:var(--text);font-weight:600}
+.uname{display:none;font-weight:600}
+.main{padding:24px 16px 48px;max-width:1120px;width:100%;margin:0 auto}
+.page{animation:rise .24s ease-out}@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+.desk{display:none}
+@media(min-width:640px){.uname{display:inline}.main{padding:32px 24px 64px}.crumbs ol{font-size:.92rem}}
+@media(min-width:1024px){
+ .shell{grid-template-columns:272px 1fr;transition:grid-template-columns .22s ease}.shell.min{grid-template-columns:72px 1fr}
+ .side{position:sticky;top:0;height:100vh;transform:none;width:auto}.mobile{display:none}.desk{display:flex}.drawerScrim{display:none}
+ .min .lbl{display:none}.min .sideTop span{display:none}.min .link{justify-content:center}.min .collapse{justify-content:center}
+}
+
+.mk{fill:var(--primary)}.mkp{fill:var(--on-primary)}.mkd{fill:var(--chart-3);stroke:var(--primary);stroke-width:1.5}
+.side{background:var(--side);border-right:0}
+.side .brand{color:#fff}.side .mk{fill:#C4A4DA}.side .mkp{fill:#4C2365}.side .mkd{fill:#7F5D99;stroke:#C4A4DA}
+.side .link{color:var(--side-2)}.side .link:hover{background:var(--side-hover);color:#fff}.side .link.on{background:var(--side-active);color:#fff;box-shadow:inset 3px 0 0 #C4A4DA}
+.side .collapse{color:var(--side-2)}.side .collapse:hover{background:var(--side-hover);color:#fff}
+.side .icon{background:transparent;color:#fff;border-color:rgba(255,255,255,.28)}
+.top{background:color-mix(in srgb,var(--bg) 88%,transparent)}

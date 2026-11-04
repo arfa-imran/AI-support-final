@@ -1,0 +1,26 @@
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hero{position:relative;overflow:hidden;display:grid;gap:20px;padding:28px;border-radius:var(--r-lg);color:#fff;background:linear-gradient(135deg,#4C2365 0%,#7F5D99 100%);margin-bottom:24px;box-shadow:var(--sh)}
+.hero::before{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;background:rgba(196,164,218,.22)}
+.hero::after{content:"";position:absolute;right:60px;bottom:-90px;width:180px;height:180px;border-radius:50%;background:rgba(196,164,218,.14)}
+.hero>*{position:relative;z-index:1}.hero h1{color:#fff;font-size:1.8rem}.hero p{margin:6px 0 0;color:rgba(255,255,255,.92)}
+.hero .eyebrow{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#EADDF4;margin:0 0 6px}
+.ask{display:flex;gap:8px;max-width:540px}.ask input{flex:1;height:48px;border:0;border-radius:12px;padding:0 16px;background:#fff;color:#26182F}
+.ask button{width:48px;height:48px;border:0;border-radius:12px;background:#C4A4DA;color:#2A1238;cursor:pointer;display:grid;place-items:center;transition:transform .15s}.ask button:hover{transform:scale(1.05)}
+.tiles,.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.tile{display:flex;flex-direction:column;gap:12px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);color:var(--text);text-decoration:none;font-weight:600;transition:transform .15s,box-shadow .15s,border-color .15s}
+.tile:hover{transform:translateY(-2px);border-color:var(--chart-3);box-shadow:var(--sh-lg)}
+.tile i,.kpi i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--subtle);color:var(--primary)}
+.kpi{position:relative;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh)}
+.kpi i{position:absolute;right:16px;top:16px;width:36px;height:36px}.kpi b{display:block;font-size:2rem;line-height:1.1;letter-spacing:-.02em;margin-top:4px}.kpi span{color:var(--text-2);font-size:.88rem}
+.grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}.stack{display:flex;flex-direction:column;gap:16px}
+@media(min-width:1024px){.g2{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--border)}.row:first-of-type{border-top:0;padding-top:0}
+.muted{color:var(--text-2);font-size:.88rem}.inline{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.steps{display:flex;gap:6px;width:100%}.step{flex:1;text-align:center;font-size:.72rem;padding:4px 0;border-radius:99px;background:var(--subtle);color:var(--text-2)}.step.on{background:var(--primary);color:var(--on-primary);font-weight:600}
+.chart{width:100%;height:auto}.donutWrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:.9rem}.legend li{display:flex;align-items:center;gap:8px}.dot{width:12px;height:12px;border-radius:4px}
+.bars{display:flex;flex-direction:column;gap:12px}.bar{display:grid;grid-template-columns:130px 1fr 28px;gap:10px;align-items:center;font-size:.88rem}
+.track{height:10px;border-radius:99px;background:var(--subtle)}.fill{height:100%;border-radius:99px;background:var(--chart-2);transition:width .4s}
+.tw{overflow-x:auto}.tw table{width:100%;border-collapse:collapse}.tw th,.tw td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border)}.tw th{font-size:.82rem;color:var(--text-2);background:var(--subtle)}
+@media(max-width:640px){.hero{padding:20px}.hero h1{font-size:1.4rem}.bar{grid-template-columns:90px 1fr 24px}}
+.convo{display:flex;justify-content:space-between;gap:8px;width:100%;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);font:inherit;cursor:pointer;text-align:left}.convo:hover{background:var(--subtle)}.convoOn{background:var(--subtle);border-color:var(--primary)}
