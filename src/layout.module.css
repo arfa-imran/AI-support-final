@@ -36,3 +36,12 @@
 .side .collapse{color:var(--side-2)}.side .collapse:hover{background:var(--side-hover);color:#fff}
 .side .icon{background:transparent;color:#fff;border-color:rgba(255,255,255,.28)}
 .top{background:color-mix(in srgb,var(--bg) 88%,transparent)}
+
+.cwrap{min-height:100vh}
+.cTop{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.cBar{max-width:1120px;margin:0 auto;padding:0 16px;height:64px;display:flex;align-items:center;gap:16px}
+.cNav{display:flex;gap:4px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}.cNav::-webkit-scrollbar{display:none}
+.cLink{padding:8px 14px;border-radius:99px;color:var(--text-2);text-decoration:none;font-weight:500;white-space:nowrap;transition:background var(--t),color var(--t)}
+.cLink:hover{background:var(--subtle);color:var(--text)}.cOn,.cOn:hover{background:var(--primary);color:var(--on-primary);font-weight:600}
+.cMain{max-width:1120px;margin:0 auto;padding:24px 16px 64px}
+@media(max-width:640px){.cBar .brand span{display:none}}

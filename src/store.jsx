@@ -1,26 +1,41 @@
-import {createContext,useContext,useState} from 'react'
+import {createContext,useContext,useEffect,useRef,useState} from 'react'
+import {Link} from 'react-router-dom'
 const C=createContext()
 export const useApp=()=>useContext(C)
+export const useBase=()=>{const {user}=useApp();return user.role==='customer'?'/portal':'/'+user.role}
+export const L=({to,...p})=>{const b=useBase();return <Link to={b+to} {...p}/>}
 const now=()=>new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
 const seed=[{id:'ORD-1001',item:'Wireless headphones',status:'Shipped',delay:5,ago:0},{id:'ORD-1002',item:'Laptop stand',status:'Delivered',delay:0,ago:2},{id:'ORD-1003',item:'Phone case',status:'Processing',delay:0,ago:0},{id:'ORD-1004',item:'Mechanical keyboard',status:'Delivered',delay:0,ago:30}]
 export const STATUSES=['Processing','Shipped','Delivered']
 const GUEST={role:'customer',email:'alex@demo.com',name:'Alex',phone:'',address:'',guest:true}
+
+// Shared demo data is saved in localStorage and synced between browser tabs.
+// The logged-in user is saved per tab (sessionStorage), so two tabs can be two different people.
+function useShared(key,init){
+  const k='sa:'+key,first=useRef(true)
+  const [v,setV]=useState(()=>{try{const x=localStorage.getItem(k);return x?JSON.parse(x):init}catch{return init}})
+  useEffect(()=>{if(first.current){first.current=false;return};try{localStorage.setItem(k,JSON.stringify(v))}catch{}},[v])
+  useEffect(()=>{const h=e=>{if(e.key===k&&e.newValue){try{setV(JSON.parse(e.newValue))}catch{}}};window.addEventListener('storage',h);return()=>window.removeEventListener('storage',h)},[])
+  return [v,setV]
+}
+export const resetDemo=()=>{try{Object.keys(localStorage).filter(x=>x.startsWith('sa:')).forEach(x=>localStorage.removeItem(x));sessionStorage.clear()}catch{};location.assign('/')}
 export function Provider({children}){
-  const [user,setUser]=useState(GUEST)
-  const [orders,setOrders]=useState(seed)
-  const [refunds,setRefunds]=useState([])
-  const [tickets,setTickets]=useState([])
-  const [log,setLog]=useState([])
-  const [msgs,setMsgs]=useState([{who:'bot',text:'Hi, I can check an order, start a refund or raise a ticket. What do you need?'}])
+  const [user,setUser]=useState(()=>{try{const x=sessionStorage.getItem('sa:user');return x?JSON.parse(x):GUEST}catch{return GUEST}})
+  useEffect(()=>{try{sessionStorage.setItem('sa:user',JSON.stringify(user))}catch{}},[user])
+  const [orders,setOrders]=useShared('orders',seed)
+  const [refunds,setRefunds]=useShared('refunds',[])
+  const [tickets,setTickets]=useShared('tickets',[])
+  const [log,setLog]=useShared('log',[])
+  const [msgs,setMsgs]=useShared('msgs',[{who:'bot',text:'Hi, I can check an order, start a refund or raise a ticket. What do you need?'}])
   const [busy,setBusy]=useState(false)
   const [pending,setPending]=useState(null)
   const meta={intent:'General question'}
-  const [requests,setRequests]=useState([])
-  const [convos,setConvos]=useState([
+  const [requests,setRequests]=useShared('requests',[])
+  const [convos,setConvos]=useShared('convos',[
     {id:'C-1',customer:'Sam',t:'09:12',sample:true,msgs:[{who:'bot',text:'Hi, how can I help?'},{who:'me',text:'Where is ORD-1003?'},{who:'bot',text:'Phone case (ORD-1003) is processing.',intent:'Order status'}]},
     {id:'C-2',customer:'Lina',t:'08:40',sample:true,msgs:[{who:'bot',text:'Hi, how can I help?'},{who:'me',text:'My order is delayed, I want a refund'},{who:'bot',text:'Done. Your refund is waiting for staff approval.',intent:'Refund request',action:{label:'Refund created: RF-9',detail:'ORD-1001 · It is 5 days late.'}}]}])
   const newChat=()=>{if(msgs.length>1)setConvos(c=>[{id:'C-'+(c.length+1),customer:user.name,t:now(),msgs},...c]);setMsgs(msgs.slice(0,1))}
-  const [agents,setAgents]=useState([{id:1,name:'Maya Khan',email:'maya@support.com',status:'Active'},{id:2,name:'Omar Ali',email:'omar@support.com',status:'Active'},{id:3,name:'Sara Noor',email:'sara@support.com',status:'Away'}])
+  const [agents,setAgents]=useShared('agents',[{id:1,name:'Maya Khan',email:'maya@support.com',status:'Active'},{id:2,name:'Omar Ali',email:'omar@support.com',status:'Active'},{id:3,name:'Sara Noor',email:'sara@support.com',status:'Away'}])
   const addAgent=(name,email)=>setAgents(a=>[...a,{id:a.length+1,name,email,status:'Active'}])
   const toggleAgent=id=>setAgents(a=>a.map(x=>x.id===id?{...x,status:x.status==='Active'?'Away':'Active'}:x))
   const addLog=(a,d)=>setLog(l=>[{t:now(),a,d},...l])

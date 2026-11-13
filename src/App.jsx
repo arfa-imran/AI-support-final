@@ -1,28 +1,27 @@
 import {Routes,Route,Navigate} from 'react-router-dom'
 import {useApp} from './store.jsx'
-import {CustomerPortal,RoleDashboard,AgentsPage,ConversationsPage} from './dashboards.jsx'
-import {DashboardShell,Soon} from './layout.jsx'
-import {Auth,Profile,Orders,OrderDetail,Refunds,Tickets,TicketDetail,Chat,Dashboard,AiLog} from './pages.jsx'
-const home=r=>r==='customer'?'/portal':'/dashboard'
-function Guard({roles}){
+import {CustomerLayout,DashboardShell,home} from './layout.jsx'
+import {Auth,Chat,AiLog} from './pages.jsx'
+import {MyOrders,MyOrderDetail,MyRefunds,MyTickets,MyTicketDetail,MyAccount} from './customer.jsx'
+import {StaffOrders,StaffOrderDetail,StaffRefunds,StaffTickets,StaffTicketDetail,StaffProfile} from './staff.jsx'
+import {CustomerPortal,AgentDashboard,AdminDashboard,AgentsPage,ConversationsPage} from './dashboards.jsx'
+function Guard({role}){
   const {user}=useApp()
-  if(!user)return <Navigate to="/login" replace/>
-  if(roles&&!roles.includes(user.role))return <Navigate to={home(user.role)} replace/>
-  return <DashboardShell/>
+  if(user.role===role)return role==='customer'?<CustomerLayout/>:<DashboardShell/>
+  return <Navigate to={user.role==='customer'?'/staff/login':home(user.role)} replace/>
 }
+const cust=<><Route path="chat" element={<Chat/>}/><Route path="orders" element={<MyOrders/>}/><Route path="orders/:id" element={<MyOrderDetail/>}/><Route path="refunds" element={<MyRefunds/>}/><Route path="tickets" element={<MyTickets/>}/><Route path="tickets/:id" element={<MyTicketDetail/>}/><Route path="profile" element={<MyAccount/>}/></>
+const staff=<><Route path="orders" element={<StaffOrders/>}/><Route path="orders/:id" element={<StaffOrderDetail/>}/><Route path="refunds" element={<StaffRefunds/>}/><Route path="tickets" element={<StaffTickets/>}/><Route path="tickets/:id" element={<StaffTicketDetail/>}/><Route path="profile" element={<StaffProfile/>}/><Route path="conversations" element={<ConversationsPage/>}/><Route path="log" element={<AiLog/>}/></>
 export default function App(){
   const {user}=useApp()
   return <Routes>
-    <Route path="/login" element={user.guest?<Auth mode="login"/>:<Navigate to={home(user.role)}/>}/>
-    <Route path="/register" element={<Auth mode="register"/>}/>
-    <Route element={<Guard/>}>
-      <Route path="/profile" element={<Profile/>}/><Route path="/orders" element={<Orders/>}/><Route path="/orders/:id" element={<OrderDetail/>}/>
-      <Route path="/refunds" element={<Refunds/>}/><Route path="/tickets" element={<Tickets/>}/><Route path="/tickets/:id" element={<TicketDetail/>}/>
-    </Route>
-    <Route element={<Guard roles={['customer']}/>}><Route path="/portal" element={<CustomerPortal/>}/><Route path="/chat" element={<Chat/>}/></Route>
-    <Route element={<Guard roles={['agent','admin']}/>}><Route path="/dashboard" element={<RoleDashboard/>}/><Route path="/log" element={<AiLog/>}/><Route path="/conversations" element={<ConversationsPage/>}/></Route>
-    <Route element={<Guard roles={['admin']}/>}><Route path="/agents" element={<AgentsPage/>}/></Route>
     <Route path="/" element={<Navigate to="/portal" replace/>}/>
+    <Route path="/login" element={user.guest?<Auth mode="login"/>:<Navigate to={home(user.role)} replace/>}/>
+    <Route path="/register" element={<Auth mode="register"/>}/>
+    <Route path="/staff/login" element={user.role==='customer'?<Auth mode="staff"/>:<Navigate to={home(user.role)} replace/>}/>
+    <Route path="/portal" element={<Guard role="customer"/>}><Route index element={<CustomerPortal/>}/>{cust}</Route>
+    <Route path="/agent" element={<Guard role="agent"/>}><Route index element={<AgentDashboard/>}/>{staff}</Route>
+    <Route path="/admin" element={<Guard role="admin"/>}><Route index element={<AdminDashboard/>}/>{staff}<Route path="agents" element={<AgentsPage/>}/></Route>
     <Route path="*" element={<Navigate to="/portal" replace/>}/>
   </Routes>
 }
