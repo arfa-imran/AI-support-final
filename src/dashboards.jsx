@@ -4,9 +4,9 @@ import {Package,RotateCcw,LifeBuoy,MessageSquare,Send,ShoppingBag,Inbox,Bot,User
 import s from './dash.module.css'
 import {useApp,STATUSES,L} from './store.jsx'
 import {Card,Badge,Button,Avatar,Input,Modal,EmptyState,PageHeader,useToast} from './ui.jsx'
-import {AreaChart,Donut,Bars} from './charts.jsx'
+import {AreaChart,Donut,Bars,HeroChart} from './charts.jsx'
 const tone=t=>({Approved:'success',Resolved:'success',Delivered:'success',Active:'success',Rejected:'danger',Pending:'warning',Open:'warning',Away:'neutral','In progress':'info',Shipped:'info',Processing:'neutral'}[t]||'neutral')
-const Kpi=({icon:I,n,l})=><div className={s.kpi}><i><I size={18} aria-hidden="true"/></i><b>{n}</b><span>{l}</span></div>
+const Kpi=({icon:I,n,l})=><div className={s.kpi}><div className={s.kpiTop}><i><I size={18} aria-hidden="true"/></i><span>{l}</span></div><b>{n}</b></div>
 const byStatus=t=>['Open','In progress','Resolved'].map(x=>({label:x,value:t.filter(k=>k.status===x).length}))
 const Activity=({log,n=5})=>log.length?log.slice(0,n).map((a,i)=><div className={s.row} key={i}><span>{a.a} <span className={s.muted}>· {a.d}</span></span><span className={s.muted}>{a.t}</span></div>):<EmptyState icon={Bot} title="No AI activity yet" text="Actions the AI agent takes will show up here."/>
 
@@ -27,24 +27,20 @@ export function ConversationsPage(){
 export function CustomerPortal(){
   const {user,orders,refunds,tickets,log,send}=useApp(),nav=useNavigate(),[q,setQ]=useState('')
   const h=new Date().getHours(),hi=h<12?'Good morning':h<18?'Good afternoon':'Good evening',late=orders.filter(o=>o.delay>=3)
-  const tiles=[['/portal/orders','Track an order',Package],['/portal/refunds','Request a refund',RotateCcw],['/portal/tickets','Raise a ticket',LifeBuoy],['/portal/chat','Chat with AI',MessageSquare]]
+  const tiles=[['/portal/refunds','Request a refund',RotateCcw],['/portal/tickets','Raise a request',LifeBuoy],['/portal/chat','Chat with support',MessageSquare]]
   return <>
-    <section className={s.hero}><div><p className={s.eyebrow}>Customer portal</p><h1>{hi}, {user.name}</h1><p>Track orders, get refunds and talk to support, all in one place.</p></div>
+    <section className={s.hero}><div><h1>{hi}, {user.name}</h1></div>
       <form className={s.ask} onSubmit={e=>{e.preventDefault();if(q.trim()){send(q);nav('/portal/chat')}}}><label htmlFor="ask" className={s.sr}>Ask the AI agent</label><input id="ask" value={q} onChange={e=>setQ(e.target.value)} placeholder="Ask anything, e.g. Where is ORD-1001?"/><button aria-label="Send to AI agent"><Send size={20}/></button></form></section>
-    <div className={s.tiles}>{tiles.map(([to,l,I])=><Link key={to} to={to} className={s.tile}><i><I size={20} aria-hidden="true"/></i>{l}</Link>)}</div>
-    <div className={s.kpis}><Kpi icon={ShoppingBag} n={orders.filter(o=>o.status!=='Delivered').length} l="Active orders"/><Kpi icon={RotateCcw} n={refunds.filter(r=>r.status==='Pending').length} l="Refunds in review"/><Kpi icon={LifeBuoy} n={tickets.filter(t=>t.status!=='Resolved').length} l="Open tickets"/></div>
-    <div className={`${s.grid} ${s.g2}`}>
-      <Card title="Your orders">{orders.slice(0,4).map(o=>{const i=STATUSES.indexOf(o.status);return <div className={s.row} key={o.id}><div><L to={'/orders/'+o.id}><strong>{o.item}</strong></L><div className={s.muted}>{o.id}{o.delay>0&&' · '+o.delay+' days late'}</div></div><Badge tone={tone(o.status)}>{o.status}</Badge>
-        <div className={s.steps}>{STATUSES.map((x,k)=><span key={x} className={`${s.step} ${k<=i?s.on:''}`}>{k<=i?'✓ ':''}{x}</span>)}</div></div>})}</Card>
-      <div className={s.stack}>
-        <Card title="Needs your attention">{late.length?late.map(o=><div className={s.row} key={o.id}><span>{o.item} is {o.delay} days late</span><L to="/refunds"><Button size="sm" variant="secondary" tabIndex={-1}>Request refund</Button></L></div>):<EmptyState icon={CheckCircle2} title="All clear" text="No late orders right now."/>}</Card>
-        <Card title="Recent activity"><Activity log={log} n={4}/></Card></div></div></>
+    <div className={s.tiles3}>{tiles.map(([to,l,I])=><Link key={to} to={to} className={s.tile}><i><I size={20} aria-hidden="true"/></i>{l}</Link>)}</div>
+    <div className={`${s.grid} ${s.even}`}>
+      <Card title="Your orders">{orders.slice(0,3).map(o=>{const i=STATUSES.indexOf(o.status);return <div className={s.row} key={o.id}><div><L to={'/orders/'+o.id}><strong>{o.item}</strong></L><div className={s.muted}>{o.id}{o.delay>0&&' · '+o.delay+' days late'}</div></div><Badge tone={tone(o.status)}>{o.status}</Badge></div>})}</Card>
+      <Card title="Orders by status"><Donut parts={STATUSES.map(x=>({label:x,value:orders.filter(o=>o.status===x).length}))}/></Card></div></>
 }
 
 export function AgentDashboard(){
   const {user,tickets,refunds,log,setRefund,patchTicket}=useApp(),toast=useToast()
   const open=tickets.filter(t=>t.status!=='Resolved'),pend=refunds.filter(r=>r.status==='Pending')
-  return <><PageHeader title={'Welcome back, '+user.name} subtitle="Your support queue for today."/>
+  return <><section className={s.hero}><div><p className={s.eyebrow}>Agent workspace</p><h1>Welcome back, {user.name}</h1><p>You have {open.length} open ticket(s) and {pend.length} refund(s) to review.</p></div><div className={s.heroBtns}><L to="/tickets" className={s.heroBtn}>View tickets</L><L to="/refunds" className={s.heroBtn}>Review refunds</L></div></section>
     <div className={s.kpis}><Kpi icon={LifeBuoy} n={open.length} l="Open tickets"/><Kpi icon={RotateCcw} n={pend.length} l="Refunds to review"/><Kpi icon={CheckCircle2} n={tickets.length-open.length} l="Resolved tickets"/><Kpi icon={Bot} n={log.length} l="AI actions"/></div>
     <div className={`${s.grid} ${s.g2}`}><div className={s.stack}>
       <Card title="Ticket queue">{open.length?open.map(t=><div className={s.row} key={t.id}><div><L to={'/tickets/'+t.id}><strong>{t.id}</strong></L> <span>{t.subject}</span><div className={s.muted}>Order: {t.order}</div></div><span className={s.inline}><Badge tone={tone(t.status)}>{t.status}</Badge><Button size="sm" variant="secondary" onClick={()=>{patchTicket(t.id,{status:'Resolved'});toast(t.id+' resolved','success')}}>Resolve</Button></span></div>):<EmptyState icon={Inbox} title="Queue is empty" text="New tickets from customers and the AI agent appear here."/>}</Card>
@@ -64,14 +60,12 @@ export function AgentsPage(){
 export function AdminDashboard(){
   const {orders,refunds,tickets,log,agents}=useApp()
   const types=Object.entries(log.reduce((m,a)=>(m[a.a]=(m[a.a]||0)+1,m),{})).map(([label,value])=>({label,value}))
-  return <><PageHeader title="Admin overview" subtitle="Everything happening across your support platform."/>
+  return <><PageHeader title="Overview" subtitle="Welcome to your admin dashboard."/>
+    <HeroChart title="Customer requests" pill="Last 7 days · sample data" data={[14,22,18,27,31,19,24]} labels={['Mon','Tue','Wed','Thu','Fri','Sat','Sun']}/>
     <div className={s.kpis}><Kpi icon={ShoppingBag} n={orders.length} l="Orders"/><Kpi icon={RotateCcw} n={refunds.filter(r=>r.status==='Pending').length} l="Pending refunds"/><Kpi icon={LifeBuoy} n={tickets.filter(t=>t.status!=='Resolved').length} l="Open tickets"/><Kpi icon={Users} n={agents.filter(a=>a.status==='Active').length} l="Active agents"/></div>
-    <div className={`${s.grid} ${s.g2}`}>
-      <Card title="Customer requests, last 7 days"><AreaChart data={[14,22,18,27,31,19,24]} labels={['Mon','Tue','Wed','Thu','Fri','Sat','Sun']}/><p className={s.muted}>Sample data for the demo.</p></Card>
-      <Card title="Tickets by status"><Donut parts={byStatus(tickets)}/></Card></div>
-    <div className={`${s.grid} ${s.g2}`} style={{marginTop:16}}>
-      <Card title="AI actions by type">{types.length?<Bars items={types}/>:<EmptyState icon={Bot} title="No AI actions yet" text="Chat as a customer to generate some."/>}</Card>
-      <Card title="Recent AI activity"><Activity log={log} n={5}/></Card></div>
-    <div className={`${s.grid} ${s.g2}`} style={{marginTop:16}}><OrdersCard/><RequestsCard/></div><div style={{marginTop:16}}><AgentsPage/></div></>
+    <div className={`${s.grid} ${s.g2}`}><Card title="Tickets by status"><Donut parts={byStatus(tickets)}/></Card><RequestsCard/></div>
+    <div className={`${s.grid} ${s.g2}`} style={{marginTop:16}}><Card title="AI actions by type">{types.length?<Bars items={types}/>:<EmptyState icon={Bot} title="No AI actions yet" text="Chat as a customer to generate some."/>}</Card><Card title="Recent AI activity"><Activity log={log} n={5}/></Card></div>
+    <div style={{marginTop:16}}><OrdersCard/></div>
+    <div style={{marginTop:16}}><AgentsPage/></div></>
 }
 export function RoleDashboard(){const {user}=useApp();return user.role==='admin'?<AdminDashboard/>:<AgentDashboard/>}
