@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import {Link,useNavigate,useParams,useSearchParams} from 'react-router-dom'
-import {Package,RotateCcw,LifeBuoy,MessageSquare} from 'lucide-react'
+import {RotateCcw,LifeBuoy,MessageSquare} from 'lucide-react'
 import s from './screens.module.css'
 import {useApp,STATUSES} from './store.jsx'
 import {Card,Badge,Button,Input,EmptyState,PageHeader,useToast,cx} from './ui.jsx'

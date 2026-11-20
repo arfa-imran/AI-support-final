@@ -8,8 +8,8 @@
 .shell{min-height:100vh}
 .frame{display:grid;grid-template-columns:minmax(0,1fr);min-height:100vh;background:var(--surface)}
 .col{min-width:0;display:flex;flex-direction:column;background:var(--bg)}
-.side{position:fixed;inset:0 auto 0 0;width:276px;background:var(--surface);display:flex;flex-direction:column;padding:20px 14px 16px;transform:translateX(-100%);transition:transform .22s ease;z-index:60}
-.side.open{transform:none;box-shadow:var(--sh-lg)}
+.side{position:fixed;inset:0 auto 0 0;width:min(276px,86vw);background:var(--surface);display:flex;flex-direction:column;padding:20px 14px 16px;transform:translateX(-100%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;z-index:60;overflow-y:auto}
+.side.open{transform:none;visibility:visible;transition:transform .22s ease,visibility 0s;box-shadow:var(--sh-lg)}
 .drawerScrim{position:fixed;inset:0;background:rgba(20,10,30,.5);z-index:55;animation:fade .15s}@keyframes fade{from{opacity:0}}
 .sideTop{display:flex;justify-content:space-between;align-items:center;padding:4px 10px 24px}
 .nav{display:flex;flex-direction:column;gap:4px;flex:1}
@@ -45,7 +45,12 @@
  .shell{padding:16px}
  .frame{grid-template-columns:276px minmax(0,1fr);min-height:calc(100vh - 32px);border-radius:18px;overflow:clip;box-shadow:0 24px 60px rgba(127,93,153,.2);transition:grid-template-columns .22s ease}
  .shell.min .frame{grid-template-columns:78px minmax(0,1fr)}
- .side{position:sticky;top:16px;align-self:start;height:calc(100vh - 32px);transform:none;width:auto}
+ .side{position:sticky;top:16px;align-self:start;height:calc(100vh - 32px);transform:none;width:auto;visibility:visible;overflow-y:auto}
  .mobile{display:none}.desk{display:flex}.drawerScrim{display:none}
  .min .lbl,.min .sideTop span,.min .promo{display:none}.min .link,.min .collapse{justify-content:center}
 }
+
+.authLink{display:inline-flex;align-items:center;height:34px;padding:0 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);text-decoration:none;font-size:.86rem;font-weight:600}.authLink:hover{background:var(--subtle)}
+.cLink{flex:none}
+.link{min-height:44px}
+@media(max-width:639px){.crumbs li:not(:last-child){display:none}.crumbs li+li::before{display:none}.top{padding:0 14px;height:68px}.cMain{padding-top:16px}}

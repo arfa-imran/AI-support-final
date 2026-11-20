@@ -20,27 +20,44 @@ export function Tooltip({text,children}){
   return <span className={s.tipwrap}><span aria-describedby={id}>{children}</span><span role="tooltip" id={id} className={s.tip}>{text}</span></span>
 }
 export function Dropdown({trigger,label,items}){
-  const [open,setOpen]=useState(false),ref=useRef()
+  const [open,setOpen]=useState(false),ref=useRef(),btn=useRef()
+  const close=(refocus=true)=>{setOpen(false);if(refocus)btn.current?.focus()}
   useEffect(()=>{if(!open)return
-    const d=e=>!ref.current?.contains(e.target)&&setOpen(false),k=e=>e.key==='Escape'&&setOpen(false)
+    ref.current?.querySelector('[role=menuitem]')?.focus()
+    const d=e=>!ref.current?.contains(e.target)&&setOpen(false),k=e=>e.key==='Escape'&&close()
     document.addEventListener('mousedown',d);document.addEventListener('keydown',k)
     return()=>{document.removeEventListener('mousedown',d);document.removeEventListener('keydown',k)}},[open])
-  return <div className={s.dd} ref={ref}><button type="button" className={s.ddBtn} aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={()=>setOpen(!open)}>{trigger}</button>
-    {open&&<div className={s.menu} role="menu">{items.map(i=><button key={i.label} role="menuitem" className={s.item} onClick={()=>{setOpen(false);i.onClick()}}>{i.icon&&<i.icon size={16} aria-hidden="true"/>}{i.label}</button>)}</div>}</div>
+  const nav=e=>{const els=[...ref.current.querySelectorAll('[role=menuitem]')],i=els.indexOf(document.activeElement)
+    if(e.key==='ArrowDown'){e.preventDefault();els[(i+1)%els.length].focus()}
+    else if(e.key==='ArrowUp'){e.preventDefault();els[(i-1+els.length)%els.length].focus()}
+    else if(e.key==='Home'){e.preventDefault();els[0].focus()}
+    else if(e.key==='End'){e.preventDefault();els[els.length-1].focus()}
+    else if(e.key==='Tab')setOpen(false)}
+  return <div className={s.dd} ref={ref}><button type="button" ref={btn} className={s.ddBtn} aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={()=>setOpen(!open)}>{trigger}</button>
+    {open&&<div className={s.menu} role="menu" aria-label={label} onKeyDown={nav}>{items.map(i=><button type="button" key={i.label} role="menuitem" className={s.item} onClick={()=>{close(false);i.onClick()}}>{i.icon&&<i.icon size={16} aria-hidden="true"/>}{i.label}</button>)}</div>}</div>
 }
 export function Modal({open,onClose,title,children,footer}){
-  const ref=useRef()
-  useEffect(()=>{if(!open)return;ref.current?.focus();const k=e=>e.key==='Escape'&&onClose();document.addEventListener('keydown',k);return()=>document.removeEventListener('keydown',k)},[open,onClose])
+  const ref=useRef(),tid=useId()
+  useEffect(()=>{if(!open)return
+    const prev=document.activeElement,box=ref.current
+    const foc=()=>[...box.querySelectorAll('input,select,textarea,button,a[href],[tabindex]:not([tabindex="-1"])')].filter(x=>!x.disabled)
+    ;(box.querySelector('input,select,textarea')||box).focus()
+    const k=e=>{if(e.key==='Escape'){onClose();return}
+      if(e.key==='Tab'){const f=foc();if(!f.length)return;const a=f[0],z=f[f.length-1]
+        if(e.shiftKey&&(document.activeElement===a||document.activeElement===box)){e.preventDefault();z.focus()}
+        else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}}
+    document.addEventListener('keydown',k);const ov=document.body.style.overflow;document.body.style.overflow='hidden'
+    return()=>{document.removeEventListener('keydown',k);document.body.style.overflow=ov;prev?.focus?.()}},[open,onClose])
   if(!open)return null
-  return <div className={s.scrim} onMouseDown={e=>e.target===e.currentTarget&&onClose()}><div className={s.modal} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={ref}>
-    <div className={s.mhead}><h2>{title}</h2><button className={s.x} onClick={onClose} aria-label="Close"><X size={18}/></button></div><div>{children}</div>{footer&&<div className={s.mfoot}>{footer}</div>}</div></div>
+  return <div className={s.scrim} onMouseDown={e=>e.target===e.currentTarget&&onClose()}><div className={s.modal} role="dialog" aria-modal="true" aria-labelledby={tid} tabIndex={-1} ref={ref}>
+    <div className={s.mhead}><h2 id={tid}>{title}</h2><button type="button" className={s.x} onClick={onClose} aria-label="Close"><X size={18}/></button></div><div>{children}</div>{footer&&<div className={s.mfoot}>{footer}</div>}</div></div>
 }
 const T=createContext()
 export const useToast=()=>useContext(T)
 export function ToastProvider({children}){
   const [list,setList]=useState([])
   const push=(text,tone='info')=>{const id=Date.now()+Math.random();setList(l=>[...l,{id,text,tone}]);setTimeout(()=>setList(l=>l.filter(x=>x.id!==id)),4000)}
-  return <T.Provider value={push}>{children}<div className={s.toasts} role="status" aria-live="polite">{list.map(t=><div key={t.id} className={cx(s.toast,s[t.tone])}>{t.tone==='success'?<CheckCircle2 size={18}/>:t.tone==='danger'?<AlertTriangle size={18}/>:<Info size={18}/>}{t.text}</div>)}</div></T.Provider>
+  return <T.Provider value={push}>{children}<div className={s.toasts} role="status" aria-live="polite" aria-atomic="false">{list.map(t=><div key={t.id} className={cx(s.toast,s[t.tone])}>{t.tone==='success'?<CheckCircle2 size={18}/>:t.tone==='danger'?<AlertTriangle size={18}/>:<Info size={18}/>}{t.text}</div>)}</div></T.Provider>
 }
 export const Loading=({text='Loading'})=><div className={s.load} role="status"><Loader2 className={s.spin} size={20} aria-hidden="true"/>{text}</div>
 export const EmptyState=({icon:I=Inbox,title,text,action})=><div className={s.empty}><I size={32} aria-hidden="true"/><strong>{title}</strong>{text&&<p>{text}</p>}{action}</div>

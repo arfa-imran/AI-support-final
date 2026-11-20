@@ -4,6 +4,7 @@ const C=createContext()
 export const useApp=()=>useContext(C)
 export const useBase=()=>{const {user}=useApp();return user.role==='customer'?'/portal':'/'+user.role}
 export const L=({to,...p})=>{const b=useBase();return <Link to={b+to} {...p}/>}
+const nextId=(p,list)=>p+(list.reduce((m,x)=>Math.max(m,parseInt(String(x.id).replace(/\D/g,''))||0),0)+1)
 const now=()=>new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
 const seed=[{id:'ORD-1001',item:'Wireless headphones',status:'Shipped',delay:5,ago:0},{id:'ORD-1002',item:'Laptop stand',status:'Delivered',delay:0,ago:2},{id:'ORD-1003',item:'Phone case',status:'Processing',delay:0,ago:0},{id:'ORD-1004',item:'Mechanical keyboard',status:'Delivered',delay:0,ago:30}]
 export const STATUSES=['Processing','Shipped','Delivered']
@@ -34,13 +35,13 @@ export function Provider({children}){
   const [convos,setConvos]=useShared('convos',[
     {id:'C-1',customer:'Sam',t:'09:12',sample:true,msgs:[{who:'bot',text:'Hi, how can I help?'},{who:'me',text:'Where is ORD-1003?'},{who:'bot',text:'Phone case (ORD-1003) is processing.',intent:'Order status'}]},
     {id:'C-2',customer:'Lina',t:'08:40',sample:true,msgs:[{who:'bot',text:'Hi, how can I help?'},{who:'me',text:'My order is delayed, I want a refund'},{who:'bot',text:'Done. Your refund is waiting for staff approval.',intent:'Refund request',action:{label:'Refund created: RF-9',detail:'ORD-1001 · It is 5 days late.'}}]}])
-  const newChat=()=>{if(msgs.length>1)setConvos(c=>[{id:'C-'+(c.length+1),customer:user.name,t:now(),msgs},...c]);setMsgs(msgs.slice(0,1))}
+  const newChat=()=>{if(msgs.length>1)setConvos(c=>[{id:nextId('C-',c),customer:user.name,t:now(),msgs},...c]);setMsgs(msgs.slice(0,1))}
   const [agents,setAgents]=useShared('agents',[{id:1,name:'Maya Khan',email:'maya@support.com',status:'Active'},{id:2,name:'Omar Ali',email:'omar@support.com',status:'Active'},{id:3,name:'Sara Noor',email:'sara@support.com',status:'Away'}])
-  const addAgent=(name,email)=>setAgents(a=>[...a,{id:a.length+1,name,email,status:'Active'}])
+  const addAgent=(name,email)=>setAgents(a=>[...a,{id:a.reduce((m,x)=>Math.max(m,x.id),0)+1,name:name.trim(),email:email.trim(),status:'Active'}])
   const toggleAgent=id=>setAgents(a=>a.map(x=>x.id===id?{...x,status:x.status==='Active'?'Away':'Active'}:x))
   const addLog=(a,d)=>setLog(l=>[{t:now(),a,d},...l])
-  const login=(role,email)=>setUser({role,email,name:email.split('@')[0]||'User',phone:'',address:''})
-  const addOrder=item=>setOrders(o=>[...o,{id:'ORD-'+(1001+o.length),item,status:'Processing',delay:0,ago:0}])
+  const login=(role,email)=>{const n=(email.split('@')[0]||'User').replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());setUser({role,email,name:n,phone:'',address:''})}
+  const addOrder=item=>setOrders(o=>[...o,{id:nextId('ORD-',o.length?o:[{id:1000}]),item:item.trim(),status:'Processing',delay:0,ago:0}])
   const setStatus=(id,status)=>setOrders(o=>o.map(x=>x.id===id?{...x,status,delay:status==='Shipped'?x.delay:0}:x))
   const eligible=o=>{
     if(refunds.some(r=>r.order===o.id))return[false,'A refund was already requested for this order.']
@@ -49,9 +50,9 @@ export function Provider({children}){
     if(o.status==='Delivered')return[false,'Delivered '+o.ago+' days ago, outside the 7-day window.']
     return[false,'The order is still on time, so no refund applies yet.']
   }
-  const newRefund=(order,reason,by)=>{const r={id:'RF-'+(refunds.length+1),order,reason,by,status:'Pending'};setRefunds(x=>[...x,r]);return r}
+  const newRefund=(order,reason,by)=>{const r={id:nextId('RF-',refunds),order,reason,by,status:'Pending'};setRefunds(x=>[...x,r]);return r}
   const setRefund=(id,status)=>{setRefunds(r=>r.map(x=>x.id===id?{...x,status}:x));addLog(status+' refund',id)}
-  const newTicket=(subject,order,by)=>{const k={id:'TK-'+(tickets.length+1),order:order||'None',subject,by,status:'Open',assignee:'',msgs:[{who:'customer',text:subject}]};setTickets(t=>[...t,k]);return k}
+  const newTicket=(subject,order,by)=>{const k={id:nextId('TK-',tickets),order:order||'None',subject,by,status:'Open',assignee:'',msgs:[{who:'customer',text:subject}]};setTickets(t=>[...t,k]);return k}
   const patchTicket=(id,p)=>setTickets(t=>t.map(x=>x.id===id?{...x,...p}:x))
   const replyTicket=(id,who,text)=>setTickets(t=>t.map(x=>x.id===id?{...x,msgs:[...x.msgs,{who,text}]}:x))
   const think=text=>{
